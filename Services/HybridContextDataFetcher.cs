@@ -17,16 +17,13 @@ public interface IHybridContextDataFetcher
 public class HybridContextDataFetcher : IHybridContextDataFetcher
 {
     private readonly ApplicationDbContext _db;
-    private readonly TemplateEngineService _templateEngine;
     private readonly ILogger<HybridContextDataFetcher> _logger;
 
     public HybridContextDataFetcher(
         ApplicationDbContext db,
-        TemplateEngineService templateEngine,
         ILogger<HybridContextDataFetcher> logger)
     {
         _db = db;
-        _templateEngine = templateEngine;
         _logger = logger;
     }
 

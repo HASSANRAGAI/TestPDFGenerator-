@@ -272,6 +272,8 @@ This should download a PDF file.
 
 ## Performance Tests
 
+**Note**: Performance expectations below are baseline estimates for a development environment with moderate hardware. Actual performance will vary based on database size, hardware specifications, concurrent users, and network latency.
+
 ### Test 1: Simple Join Performance
 - Create context with 1 custom join
 - Fetch 100 records

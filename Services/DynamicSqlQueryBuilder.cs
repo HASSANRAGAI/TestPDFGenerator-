@@ -11,6 +11,7 @@ namespace PdfTemplateSystem.Services;
 public class DynamicSqlQueryBuilder
 {
     private readonly ApplicationDbContext _context;
+    private static readonly string[] ValidOperators = { "=", "!=", ">", "<", ">=", "<=", "LIKE" };
 
     public DynamicSqlQueryBuilder(ApplicationDbContext context)
     {
@@ -221,8 +222,7 @@ public class DynamicSqlQueryBuilder
 
     private void ValidateOperator(string op)
     {
-        var allowed = new[] { "=", "!=", ">", "<", ">=", "<=", "LIKE" };
-        if (!allowed.Contains(op))
+        if (!ValidOperators.Contains(op))
             throw new SecurityException($"Invalid operator: {op}");
     }
 

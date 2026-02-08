@@ -13,6 +13,8 @@ public class CustomJoinValidator : ICustomJoinValidator
 {
     private const int MaxJoinDepth = 3;
     private const int MaxJoinsPerContext = 10;
+    private static readonly string[] ValidJoinTypes = { "LEFT", "INNER", "RIGHT" };
+    private static readonly string[] ValidOperators = { "=", "!=", ">", "<", ">=", "<=", "LIKE" };
 
     public async Task<ValidationResult> ValidateAsync(CustomJoin join, Dictionary<string, object> schema)
     {
@@ -23,13 +25,11 @@ public class CustomJoinValidator : ICustomJoinValidator
             errors.Add($"Invalid alias '{join.Alias}'. Use only letters, numbers, and underscores.");
 
         // 2. Valid join type
-        var validJoinTypes = new[] { "LEFT", "INNER", "RIGHT" };
-        if (!validJoinTypes.Contains(join.JoinType.ToUpper()))
+        if (!ValidJoinTypes.Contains(join.JoinType.ToUpper()))
             errors.Add($"Invalid join type '{join.JoinType}'. Use LEFT, INNER, or RIGHT.");
 
         // 3. Valid operator
-        var validOps = new[] { "=", "!=", ">", "<", ">=", "<=", "LIKE" };
-        if (!validOps.Contains(join.Condition.Operator))
+        if (!ValidOperators.Contains(join.Condition.Operator))
             errors.Add($"Invalid operator '{join.Condition.Operator}'");
 
         // 4. Check join depth
