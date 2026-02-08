@@ -18,15 +18,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Add custom services
 builder.Services.AddScoped<SchemaDiscoveryService>();
-builder.Services.AddScoped<TemplateEngineService>();
 builder.Services.AddSingleton<PdfGenerationService>();
 builder.Services.AddScoped<ICustomJoinValidator, CustomJoinValidator>();
 builder.Services.AddScoped<IHybridContextDataFetcher, HybridContextDataFetcher>();
 
-// Configure HybridContextDataFetcher after services are built
-builder.Services.AddScoped(sp =>
+// Configure TemplateEngineService with HybridContextDataFetcher
+builder.Services.AddScoped<TemplateEngineService>(sp =>
 {
-    var templateEngine = sp.GetRequiredService<TemplateEngineService>();
+    var context = sp.GetRequiredService<ApplicationDbContext>();
+    var cache = sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+    var logger = sp.GetRequiredService<ILogger<TemplateEngineService>>();
+    var templateEngine = new TemplateEngineService(context, cache, logger);
     var dataFetcher = sp.GetRequiredService<IHybridContextDataFetcher>();
     templateEngine.SetDataFetcher(dataFetcher);
     return templateEngine;

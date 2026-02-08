@@ -8,6 +8,7 @@ A complete runtime-driven PDF template system built with .NET 8 Web API and a we
 - **Schema Discovery at Runtime** - Uses EF Core `IModel` introspection to discover database schema
 - **No Compile-Time DTOs** - All field trees generated dynamically from database schema
 - **Context Profiles** - Persisted in database to define what fields/navigations are exposed per template context
+- **Runtime Custom Joins** - Define joins between tables at runtime without EF navigation properties
 - **Admin Endpoints** - Access raw metadata; public endpoints only see shaped data
 - **Comprehensive Caching** - Schema, field trees, compiled Handlebars templates, and browser pool
 
@@ -23,6 +24,10 @@ A complete runtime-driven PDF template system built with .NET 8 Web API and a we
   - `SchemaDiscoveryService` - Runtime EF Core schema introspection
   - `TemplateEngineService` - Handlebars compilation and data shaping
   - `PdfGenerationService` - PuppeteerSharp browser pool management
+  - `HybridContextDataFetcher` - Handles both EF relationships and custom joins
+  - `DynamicSqlQueryBuilder` - Safe, parameterized SQL generation for custom joins
+  - `CustomJoinValidator` - Validates custom join configurations
+  - `ResultShaper` - Converts flat Dapper results to nested objects
   - `DataSeeder` - Initial data population
 
 - **Controllers**:
@@ -30,6 +35,7 @@ A complete runtime-driven PDF template system built with .NET 8 Web API and a we
   - `TemplatesController` - CRUD operations for templates
   - `ContextProfilesController` - CRUD for context profiles
   - `PdfController` - PDF generation and HTML preview
+  - `AdminController` - Schema introspection and join validation
 
 #### Frontend
 - **Simple HTML/CSS/JavaScript** - No build process required
@@ -189,7 +195,11 @@ builder.Services.AddCors(options =>
 
 - Microsoft.EntityFrameworkCore (8.0.0)
 - Microsoft.EntityFrameworkCore.InMemory (8.0.0)
+- Microsoft.EntityFrameworkCore.Relational (8.0.0)
 - Microsoft.EntityFrameworkCore.Design (8.0.0)
+- Microsoft.Data.Sqlite (8.0.0)
+- Dapper (2.1.35)
+- System.Data.SqlClient (4.8.6)
 - PuppeteerSharp (19.0.0)
 - Handlebars.Net (2.1.6)
 - Swashbuckle.AspNetCore (10.1.2)
@@ -213,6 +223,95 @@ Define what fields are exposed for each context:
     "CustomerName": "اسم العميل"
   }
 }
+```
+
+### Runtime Custom Joins
+
+The system supports defining custom joins at runtime without requiring EF Core navigation properties. This is useful for:
+- Joining tables that don't have foreign key relationships
+- Integrating with legacy databases
+- Creating dynamic relationships based on non-standard fields
+
+#### Example: Custom Join Configuration
+
+```json
+{
+  "contextName": "invoice",
+  "rootEntity": "SampleInvoice",
+  "includePaths": ["Items"],
+  "customJoins": [
+    {
+      "alias": "ExternalCustomer",
+      "targetEntity": "Customer",
+      "joinType": "LEFT",
+      "condition": {
+        "leftField": "CustomerCode",
+        "rightField": "ExternalId",
+        "operator": "="
+      },
+      "nestedJoins": []
+    }
+  ],
+  "allowedFields": [
+    "Number",
+    "Date",
+    "CustomerCode",
+    "ExternalCustomer.Name",
+    "ExternalCustomer.Email",
+    "ExternalCustomer.Phone",
+    "Items.Description",
+    "Items.Quantity"
+  ]
+}
+```
+
+#### Generated SQL
+The system generates safe, parameterized SQL queries:
+
+```sql
+SELECT
+    root.[Id] AS root_Id,
+    root.[Number] AS Number,
+    root.[Date] AS Date,
+    root.[CustomerCode] AS CustomerCode,
+    ExternalCustomer.[Name] AS ExternalCustomer_Name,
+    ExternalCustomer.[Email] AS ExternalCustomer_Email,
+    ExternalCustomer.[Phone] AS ExternalCustomer_Phone,
+    Items.[Description] AS Items_Description,
+    Items.[Quantity] AS Items_Quantity
+FROM SampleInvoices AS root
+LEFT JOIN SampleInvoiceItems AS Items ON root.[Id] = Items.[SampleInvoiceId]
+LEFT JOIN Customers AS ExternalCustomer 
+    ON root.[CustomerCode] = ExternalCustomer.[ExternalId]
+WHERE root.[Id] = @Id
+```
+
+#### Security Features
+- **SQL Injection Prevention**: All identifiers validated with regex `^[a-zA-Z_][a-zA-Z0-9_]*$`
+- **Operator Whitelisting**: Only `=`, `!=`, `>`, `<`, `>=`, `<=`, `LIKE` allowed
+- **Parameterized Queries**: All values passed as parameters
+- **Identifier Escaping**: All identifiers escaped with `[brackets]`
+- **Join Depth Limit**: Maximum 3 levels of nested joins
+- **Join Count Limit**: Maximum 10 joins per context
+
+#### Admin Endpoints for Custom Joins
+
+```bash
+# Get available entities
+GET /api/admin/schema/entities
+
+# Get fields for an entity
+GET /api/admin/schema/entities/{entityName}/fields
+
+# Validate join configuration
+POST /api/admin/validate-joins
+{
+  "contextName": "invoice",
+  "joins": [...]
+}
+
+# Refresh schema cache
+POST /api/admin/refresh-schema
 ```
 
 ### Data Shaping
