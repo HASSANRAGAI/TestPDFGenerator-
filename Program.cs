@@ -20,6 +20,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<SchemaDiscoveryService>();
 builder.Services.AddScoped<TemplateEngineService>();
 builder.Services.AddSingleton<PdfGenerationService>();
+builder.Services.AddScoped<ICustomJoinValidator, CustomJoinValidator>();
+builder.Services.AddScoped<IHybridContextDataFetcher, HybridContextDataFetcher>();
+
+// Configure HybridContextDataFetcher after services are built
+builder.Services.AddScoped(sp =>
+{
+    var templateEngine = sp.GetRequiredService<TemplateEngineService>();
+    var dataFetcher = sp.GetRequiredService<IHybridContextDataFetcher>();
+    templateEngine.SetDataFetcher(dataFetcher);
+    return templateEngine;
+});
 
 // Add CORS for React frontend
 builder.Services.AddCors(options =>

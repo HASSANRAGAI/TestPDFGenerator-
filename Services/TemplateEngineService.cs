@@ -12,13 +12,25 @@ public class TemplateEngineService
     private readonly ApplicationDbContext _context;
     private readonly IMemoryCache _cache;
     private readonly IHandlebars _handlebars;
+    private readonly ILogger<TemplateEngineService> _logger;
+    private IHybridContextDataFetcher? _dataFetcher;
     private const string CacheKeyPrefix = "Template_";
 
-    public TemplateEngineService(ApplicationDbContext context, IMemoryCache cache)
+    public TemplateEngineService(
+        ApplicationDbContext context, 
+        IMemoryCache cache,
+        ILogger<TemplateEngineService> logger)
     {
         _context = context;
         _cache = cache;
         _handlebars = Handlebars.Create();
+        _logger = logger;
+    }
+
+    // Allow setting the data fetcher to avoid circular dependency
+    public void SetDataFetcher(IHybridContextDataFetcher dataFetcher)
+    {
+        _dataFetcher = dataFetcher;
     }
 
     public async Task<string> RenderTemplateAsync(Guid templateId, object data)
@@ -46,8 +58,21 @@ public class TemplateEngineService
         var template = await templateQuery.FirstOrDefaultAsync()
             ?? throw new InvalidOperationException($"Template not found for context '{contextName}'");
 
-        // Get entity data
-        var shapedData = await GetShapedDataAsync(profile, entityId);
+        // Get entity data - use HybridContextDataFetcher if available and has custom joins
+        object? shapedData;
+        if (_dataFetcher != null && profile.CustomJoins.Any())
+        {
+            _logger.LogInformation("Using HybridContextDataFetcher for context: {Context}", contextName);
+            shapedData = await _dataFetcher.GetSampleAsync(contextName, entityId, CancellationToken.None);
+        }
+        else
+        {
+            _logger.LogInformation("Using legacy data fetching for context: {Context}", contextName);
+            shapedData = await GetShapedDataAsync(profile, entityId);
+        }
+
+        if (shapedData == null)
+            throw new InvalidOperationException($"Entity with ID '{entityId}' not found");
 
         // Compile and render
         var compiledTemplate = GetCompiledTemplate(template.Id, template.HtmlContent);
