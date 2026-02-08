@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Template System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+        }
+        
+        .sidebar h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .nav-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .nav-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .field-tree {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .field-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .field-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .field-item.collection {
+            border-left-color: #28a745;
+        }
+        
+        .field-nested {
+            margin-left: 20px;
+            border-left: 2px dashed #dee2e6;
+            padding-left: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .preview-frame {
+            width: 100%;
+            min-height: 600px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin-bottom: 15px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            margin-bottom: 15px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .template-list {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .template-item {
+            padding: 20px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .template-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .template-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .template-item p {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 PDF Template System</h1>
+            <p>Runtime-driven PDF Generation with Dynamic Schema Discovery</p>
+        </div>
+        
+        <div class="content">
+            <div class="sidebar">
+                <h2>Navigation</h2>
+                <div class="nav-item active" onclick="showSection('generate')">
+                    📄 Generate PDF
+                </div>
+                <div class="nav-item" onclick="showSection('templates')">
+                    📝 Templates
+                </div>
+                <div class="nav-item" onclick="showSection('schema')">
+                    🗂️ Schema Discovery
+                </div>
+                <div class="nav-item" onclick="showSection('editor')">
+                    ✏️ Template Editor
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <!-- Generate PDF Section -->
+                <div id="generate" class="section active">
+                    <div class="card">
+                        <h3>Generate PDF</h3>
+                        <p style="margin-bottom: 20px; color: #6c757d;">
+                            Select a context and entity to generate a PDF document
+                        </p>
+                        
+                        <label><strong>Context:</strong></label>
+                        <select id="contextSelect">
+                            <option value="invoice">Invoice</option>
+                        </select>
+                        
+                        <label><strong>Entity ID:</strong></label>
+                        <select id="entitySelect">
+                            <option value="11111111-1111-1111-1111-111111111111">Invoice 001 - شركة التقنية المتقدمة</option>
+                            <option value="22222222-2222-2222-2222-222222222222">Invoice 002 - مؤسسة البرمجيات الحديثة</option>
+                        </select>
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="btn" onclick="generatePdf()">📥 Generate PDF</button>
+                            <button class="btn btn-secondary" onclick="previewHtml()">👁️ Preview HTML</button>
+                        </div>
+                        
+                        <div id="generateMessage"></div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>HTML Preview</h3>
+                        <iframe id="previewFrame" class="preview-frame"></iframe>
+                    </div>
+                </div>
+                
+                <!-- Templates Section -->
+                <div id="templates" class="section">
+                    <div class="card">
+                        <h3>Available Templates</h3>
+                        <div id="templateList" class="template-list">
+                            <div class="loading">Loading templates...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Schema Discovery Section -->
+                <div id="schema" class="section">
+                    <div class="card">
+                        <h3>Schema Field Tree</h3>
+                        <p style="margin-bottom: 20px; color: #6c757d;">
+                            Explore the dynamically discovered schema for the invoice context
+                        </p>
+                        
+                        <button class="btn" onclick="loadFieldTree()">🔍 Load Field Tree</button>
+                        
+                        <div id="fieldTree" style="margin-top: 20px;"></div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Raw Schema Metadata</h3>
+                        <p style="margin-bottom: 20px; color: #6c757d;">
+                            View raw entity metadata from EF Core model introspection
+                        </p>
+                        
+                        <label><strong>Entity Name:</strong></label>
+                        <select id="entityNameSelect">
+                            <option value="SampleInvoice">SampleInvoice</option>
+                            <option value="SampleInvoiceItem">SampleInvoiceItem</option>
+                        </select>
+                        
+                        <button class="btn" onclick="loadRawMetadata()">🔍 Load Metadata</button>
+                        
+                        <div id="rawMetadata" style="margin-top: 20px;"></div>
+                    </div>
+                </div>
+                
+                <!-- Template Editor Section -->
+                <div id="editor" class="section">
+                    <div class="card">
+                        <h3>Template Editor</h3>
+                        <p style="margin-bottom: 20px; color: #6c757d;">
+                            Edit Handlebars templates with live preview
+                        </p>
+                        
+                        <label><strong>Select Template:</strong></label>
+                        <select id="editorTemplateSelect" onchange="loadTemplateForEdit()">
+                            <option value="">Loading...</option>
+                        </select>
+                        
+                        <label style="margin-top: 20px; display: block;"><strong>HTML Content:</strong></label>
+                        <textarea id="templateContent" placeholder="HTML template with Handlebars syntax..."></textarea>
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="btn" onclick="saveTemplate()">💾 Save Template</button>
+                            <button class="btn btn-secondary" onclick="testTemplate()">🧪 Test with Sample Data</button>
+                        </div>
+                        
+                        <div id="editorMessage"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load data for section if needed
+            if (sectionId === 'templates') {
+                loadTemplates();
+            } else if (sectionId === 'editor') {
+                loadTemplatesForEditor();
+            }
+        }
+        
+        async function generatePdf() {
+            const context = document.getElementById('contextSelect').value;
+            const entityId = document.getElementById('entitySelect').value;
+            const messageDiv = document.getElementById('generateMessage');
+            
+            messageDiv.innerHTML = '<div class="loading">Generating PDF...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/Pdf/generate/${context}/${entityId}`);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${context}_${entityId}.pdf`;
+                    a.click();
+                    
+                    messageDiv.innerHTML = '<div class="success">✅ PDF generated successfully!</div>';
+                } else {
+                    const error = await response.json();
+                    messageDiv.innerHTML = `<div class="error">❌ Error: ${error.error || 'Failed to generate PDF'}</div>`;
+                }
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
+            }
+        }
+        
+        async function previewHtml() {
+            const context = document.getElementById('contextSelect').value;
+            const entityId = document.getElementById('entitySelect').value;
+            const iframe = document.getElementById('previewFrame');
+            const messageDiv = document.getElementById('generateMessage');
+            
+            messageDiv.innerHTML = '<div class="loading">Loading preview...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/Pdf/preview/${context}/${entityId}`);
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    iframe.srcdoc = html;
+                    messageDiv.innerHTML = '<div class="success">✅ Preview loaded successfully!</div>';
+                } else {
+                    const error = await response.json();
+                    messageDiv.innerHTML = `<div class="error">❌ Error: ${error.error || 'Failed to load preview'}</div>`;
+                }
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
+            }
+        }
+        
+        async function loadTemplates() {
+            const listDiv = document.getElementById('templateList');
+            
+            try {
+                const response = await fetch(`${API_BASE}/Templates`);
+                const templates = await response.json();
+                
+                listDiv.innerHTML = templates.map(t => `
+                    <div class="template-item">
+                        <h4>${t.name} <span class="badge badge-primary">${t.context}</span></h4>
+                        <p><strong>ID:</strong> ${t.id}</p>
+                        <p><strong>Default Entity:</strong> ${t.defaultSampleEntityId || 'None'}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                listDiv.innerHTML = `<div class="error">❌ Error loading templates: ${err.message}</div>`;
+            }
+        }
+        
+        async function loadFieldTree() {
+            const treeDiv = document.getElementById('fieldTree');
+            treeDiv.innerHTML = '<div class="loading">Loading field tree...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/Schema/field-tree/invoice`);
+                const data = await response.json();
+                
+                treeDiv.innerHTML = `
+                    <div class="field-tree">
+                        <h4>Context: ${data.Context} <span class="badge badge-primary">${data.RootEntity}</span></h4>
+                        ${renderFields(data.Fields)}
+                    </div>
+                `;
+            } catch (err) {
+                treeDiv.innerHTML = `<div class="error">❌ Error loading field tree: ${err.message}</div>`;
+            }
+        }
+        
+        function renderFields(fields) {
+            return fields.map(f => {
+                const isCollection = f.IsCollection;
+                const hasFields = f.Fields && f.Fields.length > 0;
+                
+                return `
+                    <div class="field-item ${isCollection ? 'collection' : ''}">
+                        <strong>${f.Name}</strong> 
+                        <span class="badge ${isCollection ? 'badge-success' : 'badge-primary'}">${f.Type}</span>
+                        <br>
+                        <small>${f.Label} - {{${f.Path}}}</small>
+                        ${hasFields ? `<div class="field-nested">${renderFields(f.Fields)}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function loadRawMetadata() {
+            const entityName = document.getElementById('entityNameSelect').value;
+            const metadataDiv = document.getElementById('rawMetadata');
+            metadataDiv.innerHTML = '<div class="loading">Loading metadata...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/Schema/metadata/${entityName}`);
+                const data = await response.json();
+                
+                metadataDiv.innerHTML = `
+                    <div class="field-tree">
+                        <pre style="background: white; padding: 15px; border-radius: 5px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (err) {
+                metadataDiv.innerHTML = `<div class="error">❌ Error loading metadata: ${err.message}</div>`;
+            }
+        }
+        
+        async function loadTemplatesForEditor() {
+            const select = document.getElementById('editorTemplateSelect');
+            
+            try {
+                const response = await fetch(`${API_BASE}/Templates`);
+                const templates = await response.json();
+                
+                select.innerHTML = '<option value="">Select a template...</option>' +
+                    templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+            } catch (err) {
+                select.innerHTML = '<option value="">Error loading templates</option>';
+            }
+        }
+        
+        async function loadTemplateForEdit() {
+            const templateId = document.getElementById('editorTemplateSelect').value;
+            if (!templateId) return;
+            
+            const textarea = document.getElementById('templateContent');
+            const messageDiv = document.getElementById('editorMessage');
+            
+            try {
+                const response = await fetch(`${API_BASE}/Templates/${templateId}`);
+                const template = await response.json();
+                
+                textarea.value = template.htmlContent;
+                messageDiv.innerHTML = '<div class="success">✅ Template loaded!</div>';
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
+            }
+        }
+        
+        async function saveTemplate() {
+            const templateId = document.getElementById('editorTemplateSelect').value;
+            if (!templateId) {
+                alert('Please select a template first');
+                return;
+            }
+            
+            const content = document.getElementById('templateContent').value;
+            const messageDiv = document.getElementById('editorMessage');
+            
+            try {
+                // Get current template first
+                const getResponse = await fetch(`${API_BASE}/Templates/${templateId}`);
+                const template = await getResponse.json();
+                
+                // Update it
+                template.htmlContent = content;
+                
+                const response = await fetch(`${API_BASE}/Templates/${templateId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(template)
+                });
+                
+                if (response.ok) {
+                    messageDiv.innerHTML = '<div class="success">✅ Template saved successfully!</div>';
+                } else {
+                    messageDiv.innerHTML = '<div class="error">❌ Failed to save template</div>';
+                }
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="error">❌ Error: ${err.message}</div>`;
+            }
+        }
+        
+        async function testTemplate() {
+            const content = document.getElementById('templateContent').value;
+            const messageDiv = document.getElementById('editorMessage');
+            
+            if (!content) {
+                alert('Please load a template first');
+                return;
+            }
+            
+            // Open preview with current template
+            window.open('', 'Template Preview', 'width=800,height=600');
+        }
+        
+        // Load initial data
+        window.addEventListener('load', () => {
+            // Auto-preview on page load
+            setTimeout(() => previewHtml(), 1000);
+        });
+    </script>
+</body>
+</html>
