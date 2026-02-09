@@ -121,7 +121,20 @@ public class TemplateEngineService
 
     private object ShapeData(object entity, ContextProfile profile, string pathPrefix)
     {
+        return ShapeData(entity, profile, pathPrefix, new HashSet<object>());
+    }
+
+    private object ShapeData(object entity, ContextProfile profile, string pathPrefix, HashSet<object> visited)
+    {
         if (entity == null) return new { };
+
+        // Prevent circular references by checking if we've already visited this object
+        if (visited.Contains(entity))
+        {
+            return new { };
+        }
+
+        visited.Add(entity);
 
         var entityType = entity.GetType();
         var result = new ExpandoObject() as IDictionary<string, object>;
@@ -141,7 +154,7 @@ public class TemplateEngineService
                     var navValue = property.GetValue(entity);
                     if (navValue != null)
                     {
-                        result[property.Name] = ShapeData(navValue, profile, fieldPath);
+                        result[property.Name] = ShapeData(navValue, profile, fieldPath, visited);
                     }
                 }
             }
@@ -157,7 +170,7 @@ public class TemplateEngineService
                         var shapedCollection = new List<object>();
                         foreach (var item in collectionValue)
                         {
-                            shapedCollection.Add(ShapeData(item, profile, fieldPath));
+                            shapedCollection.Add(ShapeData(item, profile, fieldPath, visited));
                         }
                         result[property.Name] = shapedCollection;
                     }
