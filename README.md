@@ -1,6 +1,21 @@
-# PDF Template System
+# ACIG PDF Template System
 
-A complete runtime-driven PDF template system built with .NET 8 Web API and a web-based frontend featuring runtime schema discovery, dynamic field trees, Handlebars templating, and PuppeteerSharp PDF generation.
+A complete runtime-driven PDF template system built with .NET 10 Web API and Next.js frontend, featuring runtime schema discovery, dynamic field trees, Handlebars templating, and PuppeteerSharp PDF generation.
+
+## 🏗️ Architecture
+
+The application is structured as a .NET solution with the following projects:
+
+```
+TestPDFGenerator/
+├── src/
+│   ├── PdfTemplateSystem.Api/    # .NET 10 Web API backend
+│   └── web/                        # Next.js frontend application
+├── frontend/                       # Legacy HTML frontend (deprecated)
+├── TestPDFGenerator.sln           # Solution file
+├── build.sh / build.bat           # Build scripts
+└── run-dev.sh                     # Development startup script
+```
 
 ## 🌟 Features
 
@@ -12,9 +27,7 @@ A complete runtime-driven PDF template system built with .NET 8 Web API and a we
 - **Admin Endpoints** - Access raw metadata; public endpoints only see shaped data
 - **Comprehensive Caching** - Schema, field trees, compiled Handlebars templates, and browser pool
 
-### Core Components
-
-#### Backend (.NET 8 Web API)
+### Backend (.NET 10 Web API)
 - **Models**:
   - `PdfTemplate` - Stores template definitions with Handlebars syntax
   - `ContextProfile` - Defines field exposure and labeling per context
@@ -37,49 +50,86 @@ A complete runtime-driven PDF template system built with .NET 8 Web API and a we
   - `PdfController` - PDF generation and HTML preview
   - `AdminController` - Schema introspection and join validation
 
-#### Frontend
-- **Simple HTML/CSS/JavaScript** - No build process required
+### Frontend (Next.js with TypeScript & Tailwind CSS)
+- **ACIG-Branded UI** - Professional blue navigation, modern design
+- **Pages**:
+  - Dashboard - Overview with statistics and quick actions
+  - Templates - Template management with inline editor
+  - Generate PDF - PDF generation with live preview
+  - Schema Discovery - Dynamic field tree visualization
 - **Features**:
-  - PDF generation with download
-  - Live HTML preview
-  - Schema field tree visualization
-  - Template editor
-  - Template management
+  - RTL support for Arabic content
+  - Responsive design
+  - API integration with error handling
+  - Real-time PDF preview
+  - Template editor with syntax highlighting
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- .NET 8 SDK
+- .NET 10 SDK
+- Node.js 18+ and npm
 - Modern web browser
 
-### Installation
+### Quick Start
 
-1. **Clone the repository**
+#### Option 1: Use the Startup Script (Recommended)
+
+**Linux/Mac:**
+```bash
+./run-dev.sh
+```
+
+This will start both the backend API on http://localhost:5000 and the frontend on http://localhost:3000.
+
+#### Option 2: Manual Setup
+
+**1. Clone the repository**
 ```bash
 git clone <repository-url>
 cd TestPDFGenerator-
 ```
 
-2. **Install dependencies**
+**2. Build everything**
 ```bash
-dotnet restore
+# Linux/Mac
+./build.sh
+
+# Windows
+build.bat
 ```
 
-3. **Run the backend**
+**3. Start the backend**
 ```bash
+cd src/PdfTemplateSystem.Api
 dotnet run --urls "http://localhost:5000"
 ```
 
-The API will be available at: http://localhost:5000
+The API will be available at: http://localhost:5000  
 Swagger documentation at: http://localhost:5000/swagger
 
-4. **Open the frontend**
+**4. Start the frontend** (in a separate terminal)
 ```bash
-# In a separate terminal or just open in browser
-cd frontend
-# Open index.html in your browser or use a simple HTTP server:
-python3 -m http.server 8080
-# Then navigate to http://localhost:8080
+cd src/web
+npm install
+npm run dev
+```
+
+The frontend will be available at: http://localhost:3000
+
+### Production Build
+
+**Build backend:**
+```bash
+cd src/PdfTemplateSystem.Api
+dotnet build -c Release
+```
+
+**Build frontend:**
+```bash
+cd src/web
+npm run build
+npm start
 ```
 
 ## 📋 API Endpoints
@@ -350,4 +400,4 @@ For issues and questions, please open an issue on GitHub.
 
 ---
 
-**Built with ❤️ using .NET 8, EF Core, Handlebars.Net, and PuppeteerSharp**
+**Built with ❤️ using .NET 10, EF Core, Next.js, React, and TypeScript**
