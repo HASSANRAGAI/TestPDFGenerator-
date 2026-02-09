@@ -9,3 +9,21 @@ dist/
 build/
 .DS_Store
 *.log
+
+# Next.js
+.next/
+out/
+.env*.local
+
+# Dependencies
+src/web/node_modules/
+
+# Build output
+src/web/.next/
+src/web/out/
+
+# Testing
+coverage/
+
+# Misc
+.turbo
