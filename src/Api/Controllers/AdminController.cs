@@ -57,7 +57,7 @@ public class AdminController : ControllerBase
         try
         {
             var model = _db.Model;
-            var entityType = model.FindEntityType($"PdfTemplateSystem.Models.{entityName}");
+            var entityType = model.FindEntityType($"TestPDFGenerator.Api.Models.{entityName}");
             
             if (entityType == null)
                 return NotFound(new { error = $"Entity '{entityName}' not found" });

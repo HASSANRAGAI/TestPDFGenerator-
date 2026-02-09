@@ -136,7 +136,7 @@ public class DynamicSqlQueryBuilder
         Microsoft.EntityFrameworkCore.Metadata.IModel model,
         Dictionary<string, string> aliases)
     {
-        var entityType = model.FindEntityType($"PdfTemplateSystem.Models.{rootEntity}");
+        var entityType = model.FindEntityType($"TestPDFGenerator.Api.Models.{rootEntity}");
         if (entityType == null)
             throw new InvalidOperationException($"Entity type '{rootEntity}' not found");
 
@@ -176,7 +176,7 @@ public class DynamicSqlQueryBuilder
 
     private string GetTableName(string entityName, Microsoft.EntityFrameworkCore.Metadata.IModel model)
     {
-        var entityType = model.FindEntityType($"PdfTemplateSystem.Models.{entityName}");
+        var entityType = model.FindEntityType($"TestPDFGenerator.Api.Models.{entityName}");
         if (entityType == null)
             throw new InvalidOperationException($"Entity type '{entityName}' not found");
 

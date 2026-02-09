@@ -53,7 +53,7 @@ public class SchemaDiscoveryService
         }
 
         var model = _context.Model;
-        var entityType = model.FindEntityType($"PdfTemplateSystem.Models.{entityName}");
+        var entityType = model.FindEntityType($"TestPDFGenerator.Api.Models.{entityName}");
 
         if (entityType == null)
         {
@@ -76,7 +76,7 @@ public class SchemaDiscoveryService
     private Dictionary<string, object> BuildFieldTree(ContextProfile profile)
     {
         var model = _context.Model;
-        var entityType = model.FindEntityType($"PdfTemplateSystem.Models.{profile.RootEntity}");
+        var entityType = model.FindEntityType($"TestPDFGenerator.Api.Models.{profile.RootEntity}");
 
         if (entityType == null)
         {

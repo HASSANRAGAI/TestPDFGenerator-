@@ -125,7 +125,7 @@ public class HybridContextDataFetcher : IHybridContextDataFetcher
 
             // Check if property is a navigation property
             if (property.PropertyType.Namespace != null &&
-                property.PropertyType.Namespace.StartsWith("PdfTemplateSystem.Models"))
+                property.PropertyType.Namespace.StartsWith("TestPDFGenerator.Api.Models"))
             {
                 if (profile.IncludePaths.Any(ip => fieldPath.StartsWith(ip) || ip.StartsWith(fieldPath)))
                 {
