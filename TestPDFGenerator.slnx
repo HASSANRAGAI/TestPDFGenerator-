@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/PdfTemplateSystem.Api/">
+    <Project Path="src/PdfTemplateSystem.Api/PdfTemplateSystem.csproj" />
+  </Folder>
+</Solution>
